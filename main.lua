@@ -36,13 +36,15 @@ local function print_r ( t )
     print()
 end
 
-
+-- request needed permissions
 native.showPopup( "requestAppPermission", {appPermission = "android.permission.READ_EXTERNAL_STORAGE", urgency = "Critical", } )
 native.showPopup( "requestAppPermission", {appPermission = "android.permission.WRITE_EXTERNAL_STORAGE", urgency = "Critical", } )
 
 
 local allPhotos
 
+
+--Function that copies first 30 images to the temporary directory
 local function copyImages()
 	local tempDirPath = system.pathForFile("", system.TemporaryDirectory)
 	local images = 0
@@ -50,6 +52,7 @@ local function copyImages()
 		if images == 30 then
 			break
 		end
+        --Create a thumbnail using photoID
 	    local thumbnail = photoLibPlus.createThumbnail(photoID)
 
 	    photoLibPlus.copyImage(photoParams["_data"], "image--"..tostring(photoID)..".png", tempDirPath)
@@ -57,11 +60,12 @@ local function copyImages()
 	    images = images+1
 	end
 	for file in lfs.dir( tempDirPath ) do
-    -- File is the current file or directory name
-    print( "Found file: " .. file )
-end
+        -- File is the current file or directory name
+        print( "Found file: " .. file )
+    end
 end
 
+--Show the thumbanails created in the "copyImages()" function
 local function displayThumbnails()
 	local images = 0
 	for photoID, photoParams in pairs(allPhotos) do
@@ -78,11 +82,13 @@ local function displayThumbnails()
 end
 
 
+--button that fetches a list of all images
 local listAllPhotosBtn = widget.newButton{ x = display.contentWidth/2, y = display.contentHeight/4, width = 200, height = 60, label = "List all photos", onRelease = function() allPhotos = photoLibPlus.listImages(); print_r(allPhotos) end}
+
+--button that calls "copyImages()"
 local copyPhotosBtn = widget.newButton{ x = display.contentWidth/2, y = display.contentHeight/4*2, width = 200, height = 60, label = "Copy images", onRelease = copyImages}
+
+--button that calls "displayThumbnails()"
 local showTumbnails = widget.newButton{ x = display.contentWidth/2, y = display.contentHeight/4*3, width = 200, height = 60, label = "Show thumbnails", onRelease = displayThumbnails}
 
-
---local thumbnails = photoLibPlus.listAvailibleThumbnails()
---print_r(thumbnails)
  
