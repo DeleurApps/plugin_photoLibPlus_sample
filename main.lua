@@ -1,73 +1,45 @@
 local photoLibPlus = require "plugin.photoLibPlus"
 local lfs = require( "lfs" )
 local widget = require "widget" 
+local json = require "json"
 
-local function print_r ( t )  
-    local print_r_cache={}
-    local function sub_print_r(t,indent)
-        if (print_r_cache[tostring(t)]) then
-            print(indent.."*"..tostring(t))
-        else
-            print_r_cache[tostring(t)]=true
-            if (type(t)=="table") then
-                for pos,val in pairs(t) do
-                    if (type(val)=="table") then
-                        print(indent.."["..pos.."] => "..tostring(t).." {")
-                        sub_print_r(val,indent..string.rep(" ",string.len(pos)+8))
-                        print(indent..string.rep(" ",string.len(pos)+6).."}")
-                    elseif (type(val)=="string") then
-                        print(indent.."["..pos..'] => "'..val..'"')
-                    else
-                        print(indent.."["..pos.."] => "..tostring(val))
-                    end
-                end
-            else
-                print(indent..tostring(t))
-            end
-        end
-    end
-    if (type(t)=="table") then
-        print(tostring(t).." {")
-        sub_print_r(t,"  ")
-        print("}")
-    else
-        sub_print_r(t,"  ")
-    end
-    print()
-end
-
--- request needed permissions
 native.showPopup( "requestAppPermission", {appPermission = "android.permission.READ_EXTERNAL_STORAGE", urgency = "Critical", } )
 native.showPopup( "requestAppPermission", {appPermission = "android.permission.WRITE_EXTERNAL_STORAGE", urgency = "Critical", } )
 
 
 local allPhotos
+local thumbnailsCreated = false;
 
-
---Function that copies first 30 images to the temporary directory
 local function copyImages()
+    if not allPhotos then
+        print( "WARNING: You must call listPhotos() before calling copyImages()" )
+        return
+    end
 	local tempDirPath = system.pathForFile("", system.TemporaryDirectory)
 	local images = 0
 	for photoID, photoParams in pairs(allPhotos) do
 		if images == 30 then
 			break
 		end
-        --Create a thumbnail using photoID
 	    local thumbnail = photoLibPlus.createThumbnail(photoID)
 
 	    photoLibPlus.copyImage(photoParams["_data"], "image--"..tostring(photoID)..".png", tempDirPath)
 	    photoLibPlus.copyImage(thumbnail["_data"], "thumbnail--"..tostring(photoID)..".png", tempDirPath)
 	    images = images+1
 	end
+    thumbnailsCreated = true
 	for file in lfs.dir( tempDirPath ) do
         -- File is the current file or directory name
         print( "Found file: " .. file )
     end
 end
 
---Show the thumbanails created in the "copyImages()" function
 local function displayThumbnails()
 	local images = 0
+    if not thumbnailsCreated then
+        print( "WARNING: You must call copyImages() before calling displayThumbnails()" )
+        return
+    end
 	for photoID, photoParams in pairs(allPhotos) do
 		if (images == 24) then
 			break
@@ -82,13 +54,9 @@ local function displayThumbnails()
 end
 
 
---button that fetches a list of all images
-local listAllPhotosBtn = widget.newButton{ x = display.contentWidth/2, y = display.contentHeight/4, width = 200, height = 60, label = "List all photos", onRelease = function() allPhotos = photoLibPlus.listImages(); print_r(allPhotos) end}
-
---button that calls "copyImages()"
+local listAllPhotosBtn = widget.newButton{ x = display.contentWidth/2, y = display.contentHeight/4, width = 200, height = 60, label = "List all photos", onRelease = function() allPhotos = photoLibPlus.listImages(); json.prettify(allPhotos) end}
 local copyPhotosBtn = widget.newButton{ x = display.contentWidth/2, y = display.contentHeight/4*2, width = 200, height = 60, label = "Copy images", onRelease = copyImages}
-
---button that calls "displayThumbnails()"
 local showTumbnails = widget.newButton{ x = display.contentWidth/2, y = display.contentHeight/4*3, width = 200, height = 60, label = "Show thumbnails", onRelease = displayThumbnails}
+
 
  
