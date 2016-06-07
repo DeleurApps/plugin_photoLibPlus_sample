@@ -4,7 +4,6 @@ local widget = require "widget"
 local json = require "json"
 
 native.showPopup( "requestAppPermission", {appPermission = "android.permission.READ_EXTERNAL_STORAGE", urgency = "Critical", } )
-native.showPopup( "requestAppPermission", {appPermission = "android.permission.WRITE_EXTERNAL_STORAGE", urgency = "Critical", } )
 
 
 local allPhotos
@@ -54,7 +53,7 @@ local function displayThumbnails()
 end
 
 
-local listAllPhotosBtn = widget.newButton{ x = display.contentWidth/2, y = display.contentHeight/4, width = 200, height = 60, label = "List all photos", onRelease = function() allPhotos = photoLibPlus.listImages(); json.prettify(allPhotos) end}
+local listAllPhotosBtn = widget.newButton{ x = display.contentWidth/2, y = display.contentHeight/4, width = 200, height = 60, label = "List all photos", onRelease = function() allPhotos = photoLibPlus.listImages(); print(json.prettify(allPhotos)) end}
 local copyPhotosBtn = widget.newButton{ x = display.contentWidth/2, y = display.contentHeight/4*2, width = 200, height = 60, label = "Copy images", onRelease = copyImages}
 local showTumbnails = widget.newButton{ x = display.contentWidth/2, y = display.contentHeight/4*3, width = 200, height = 60, label = "Show thumbnails", onRelease = displayThumbnails}
 
