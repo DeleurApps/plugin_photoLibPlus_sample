@@ -21,11 +21,8 @@ local function copyImages()
 		if images == 30 then
 			break
 		end
-		local thumbnail = photoLibPlus.createThumbnail(photoID, {name = "thumbnail--"..tostring(photoID)..".png", path = tempDirPath, width = 512, height = 384, contentMode = "fit"})
+		photoLibPlus.createThumbnail(photoID, {name = "thumbnail--"..tostring(photoID)..".png", path = tempDirPath, width = 512, height = 384, contentMode = "fit"})
 		photoLibPlus.copyImage(photoParams["_data"], "image--"..tostring(photoID)..".png", tempDirPath)
-		if system.getInfo( "platformName" ) == "Android" then
-			photoLibPlus.copyImage(thumbnail["_data"], "thumbnail--"..tostring(photoID)..".png", tempDirPath)
-		end
 	    images = images+1
 	end
     thumbnailsCreated = true
